@@ -31,7 +31,6 @@ const ANALYSIS_SCHEMA = {
   properties: {
     skillGaps: {
       type: 'array',
-      maxItems: 5,
       items: {
         type: 'object',
         properties: {
@@ -45,7 +44,6 @@ const ANALYSIS_SCHEMA = {
     },
     interviewQuestions: {
       type: 'array',
-      maxItems: 6,
       items: {
         type: 'object',
         properties: {
