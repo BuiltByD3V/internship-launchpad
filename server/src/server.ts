@@ -3,6 +3,7 @@ import cors from 'cors';
 import { env } from './config/env.js';
 import { supabasePublic } from './config/supabase.js';
 import { requireAuth } from './middleware/auth.js';
+import applicationsRouter from './routes/applications.js';
 
 const app = express();
 
@@ -18,6 +19,9 @@ app.get('/health', (_req, res) => {
 app.get('/api/me', requireAuth, (req, res) => {
   res.json(req.user);
 });
+
+// Applications CRUD (all routes require auth; queries run under the user's JWT).
+app.use('/api/applications', applicationsRouter);
 
 // TEMP (Step 2/3 verification) — proves the anon key + DB connection work.
 // Succeeds once the applications table + RLS exist (Step 3). Remove later.
