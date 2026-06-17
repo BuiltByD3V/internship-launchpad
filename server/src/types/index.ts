@@ -17,3 +17,19 @@ export interface Application {
   job_description: string | null;
   created_at: string;
 }
+
+export interface SkillGap {
+  skill: string;
+  importance: 'high' | 'medium' | 'low';
+  howToLearn: string;
+}
+
+export interface InterviewQuestion {
+  question: string;
+  category: 'technical' | 'behavioral' | 'role-specific';
+}
+
+export interface JobAnalysisResult {
+  skillGaps: SkillGap[];
+  interviewQuestions: InterviewQuestion[];
+}

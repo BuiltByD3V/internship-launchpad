@@ -19,6 +19,9 @@ dist-ssr
 CLAUDE.md
 .claude/
 
+# Personal notes
+case_study.md
+
 # Editor directories and files
 .vscode/*
 !.vscode/extensions.json
