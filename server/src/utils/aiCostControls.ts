@@ -27,6 +27,11 @@ export type UsageLimitResult =
       retryAfterSeconds: number;
     };
 
+// A real internship posting runs to hundreds of characters. Anything shorter
+// is almost certainly not a job description, and the model would otherwise
+// fall back to the student's profile and fabricate a generic analysis.
+export const MIN_JOB_DESCRIPTION_CHARS = 50;
+
 export function validateJobDescription(
   value: unknown,
   maxChars: number,
@@ -40,6 +45,14 @@ export function validateJobDescription(
   }
 
   const trimmed = value.trim();
+  if (trimmed.length < MIN_JOB_DESCRIPTION_CHARS) {
+    return {
+      ok: false,
+      status: 400,
+      error: `That does not look like a job description. Paste the full posting (at least ${MIN_JOB_DESCRIPTION_CHARS} characters).`,
+    };
+  }
+
   if (trimmed.length > maxChars) {
     return {
       ok: false,

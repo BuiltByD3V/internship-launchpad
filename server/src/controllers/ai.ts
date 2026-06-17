@@ -212,7 +212,8 @@ export async function analyzeJob(req: Request, res: Response): Promise<void> {
         'mock interview questions. Skip skills the student already lists. Tune ' +
         'question difficulty to their experience level. Return at most 5 skill ' +
         'gaps and 6 interview questions. Base everything strictly on the job ' +
-        'description and profile provided.',
+        'description and profile provided. If the text is not a real job ' +
+        'description, return empty arrays for both fields rather than guessing.',
       messages: [
         {
           role: 'user',
