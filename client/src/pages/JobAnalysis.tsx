@@ -1,11 +1,19 @@
 import { useState } from 'react';
 import { ApiError, api } from '../lib/api';
 import type { JobAnalysis as Analysis } from '../types';
+import {
+  BTN_PRIMARY,
+  INPUT,
+  Kicker,
+  PANEL,
+  SectionLabel,
+  Skeleton,
+} from '../components/ui';
 
-const IMPORTANCE_COLORS: Record<string, string> = {
-  high: 'bg-red-100 text-red-700',
-  medium: 'bg-yellow-100 text-yellow-700',
-  low: 'bg-gray-100 text-gray-600',
+const IMPORTANCE_STYLES: Record<string, string> = {
+  high: 'text-red-400 ring-red-500/30',
+  medium: 'text-amber-400 ring-amber-500/30',
+  low: 'text-zinc-400 ring-zinc-700',
 };
 
 const MAX_JOB_DESCRIPTION_CHARS = Number(
@@ -58,68 +66,113 @@ export function JobAnalysis() {
   };
 
   return (
-    <div className="space-y-6">
-      <h1 className="text-2xl font-bold text-gray-900">Job Analysis</h1>
-      <p className="text-sm text-gray-500">
-        Paste a job description to get an AI skill-gap analysis and mock interview questions.
-      </p>
-      <p className="text-xs text-gray-500">
-        AI analysis has a small quota to protect demo credits. Repeated identical descriptions may use a cached result.
-      </p>
+    <div className="space-y-10">
+      <header>
+        <Kicker path="analyze" />
+        <p className="mt-2 font-mono text-xs text-zinc-600">
+          // paste a description - skill-gap readout + mock interview questions,
+          tuned to your profile
+        </p>
+        <p className="mt-1 font-mono text-xs text-zinc-700">
+          // quotas protect demo credits; repeated profile/job combinations can
+          use cached results
+        </p>
+      </header>
 
-      <textarea
-        value={jobDescription}
-        onChange={(e) => setJobDescription(e.target.value)}
-        placeholder="Paste the job description here..."
-        rows={8}
-        className="w-full rounded-xl border border-gray-300 px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500"
-      />
-      <p className={`text-xs ${overLimit ? 'text-red-600' : 'text-gray-500'}`}>
-        {charsUsed.toLocaleString()} / {MAX_JOB_DESCRIPTION_CHARS.toLocaleString()} characters
-      </p>
-      <button
-        onClick={() => void analyze()}
-        disabled={busy || jobDescription.trim().length === 0 || overLimit}
-        className="rounded-lg bg-indigo-600 px-4 py-2 text-sm font-medium text-white hover:bg-indigo-700 disabled:opacity-50"
-      >
-        {busy ? 'Analyzing...' : 'Analyze'}
-      </button>
+      <div className="space-y-3">
+        <textarea
+          value={jobDescription}
+          onChange={(e) => setJobDescription(e.target.value)}
+          placeholder="paste the full job description here..."
+          rows={8}
+          className={INPUT}
+        />
+        <p
+          className={`font-mono text-xs ${
+            overLimit ? 'text-red-400' : 'text-zinc-600'
+          }`}
+        >
+          {charsUsed.toLocaleString()} /{' '}
+          {MAX_JOB_DESCRIPTION_CHARS.toLocaleString()} chars
+        </p>
+        <button
+          onClick={() => void analyze()}
+          disabled={busy || jobDescription.trim().length === 0 || overLimit}
+          className={BTN_PRIMARY}
+        >
+          {busy ? 'analyzing...' : '[ analyze ]'}
+        </button>
+      </div>
 
-      {error && <p className="text-sm text-red-600">{error}</p>}
+      {error && (
+        <p className="rounded-md border border-red-500/20 bg-red-500/10 px-4 py-3 font-mono text-xs text-red-400">
+          {error}
+        </p>
+      )}
+
+      {busy && (
+        <div className="grid grid-cols-1 gap-6 md:grid-cols-2">
+          <Skeleton className="h-64 w-full" />
+          <Skeleton className="h-64 w-full" />
+        </div>
+      )}
 
       {result && (
         <div className="grid grid-cols-1 gap-6 md:grid-cols-2">
-          <section className="rounded-xl bg-white p-4 shadow">
-            <h2 className="mb-3 font-semibold text-gray-900">Skill gaps</h2>
-            <ul className="space-y-3">
-              {result.skillGaps.map((g, i) => (
-                <li key={i}>
+          <section className="space-y-3">
+            <SectionLabel>skill gaps</SectionLabel>
+            <div className={`${PANEL} divide-y divide-edge`}>
+              {result.skillGaps.map((gap, index) => (
+                <div
+                  key={index}
+                  className="px-5 py-4"
+                  style={{
+                    animation: 'rise 0.4s ease-out both',
+                    animationDelay: `${index * 50}ms`,
+                  }}
+                >
                   <div className="flex items-center gap-2">
-                    <span className="font-medium text-gray-800">{g.skill}</span>
+                    <span className="font-medium text-zinc-100">
+                      {gap.skill}
+                    </span>
                     <span
-                      className={`rounded-full px-2 py-0.5 text-xs ${IMPORTANCE_COLORS[g.importance]}`}
+                      className={`rounded px-1.5 py-0.5 font-mono text-[11px] lowercase ring-1 ${IMPORTANCE_STYLES[gap.importance]}`}
                     >
-                      {g.importance}
+                      {gap.importance}
                     </span>
                   </div>
-                  <p className="text-sm text-gray-500">{g.howToLearn}</p>
-                </li>
+                  <p className="mt-1 text-sm leading-relaxed text-zinc-400">
+                    {gap.howToLearn}
+                  </p>
+                </div>
               ))}
-            </ul>
+            </div>
           </section>
 
-          <section className="rounded-xl bg-white p-4 shadow">
-            <h2 className="mb-3 font-semibold text-gray-900">
-              Mock interview questions
-            </h2>
-            <ul className="space-y-3">
-              {result.interviewQuestions.map((q, i) => (
-                <li key={i}>
-                  <p className="text-sm text-gray-800">{q.question}</p>
-                  <span className="text-xs text-indigo-600">{q.category}</span>
-                </li>
+          <section className="space-y-3">
+            <SectionLabel>mock interview</SectionLabel>
+            <div className={`${PANEL} divide-y divide-edge`}>
+              {result.interviewQuestions.map((question, index) => (
+                <div
+                  key={index}
+                  className="flex gap-3 px-5 py-4"
+                  style={{
+                    animation: 'rise 0.4s ease-out both',
+                    animationDelay: `${index * 50}ms`,
+                  }}
+                >
+                  <span className="font-mono text-accent/60">{'>'}</span>
+                  <div>
+                    <p className="text-sm leading-relaxed text-zinc-200">
+                      {question.question}
+                    </p>
+                    <span className="mt-1 inline-block font-mono text-[11px] text-zinc-600">
+                      {question.category}
+                    </span>
+                  </div>
+                </div>
               ))}
-            </ul>
+            </div>
           </section>
         </div>
       )}

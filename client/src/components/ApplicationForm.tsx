@@ -2,6 +2,7 @@ import { useState } from 'react';
 import type { FormEvent } from 'react';
 import type { ApplicationStatus } from '../types';
 import type { ApplicationInput } from '../hooks/useApplications';
+import { PANEL, INPUT, BTN_PRIMARY } from './ui';
 
 const STATUSES: ApplicationStatus[] = [
   'applied',
@@ -29,13 +30,7 @@ export function ApplicationForm({
     setBusy(true);
     setError(null);
     try {
-      await onSubmit({
-        company,
-        role,
-        status,
-        deadline: deadline || null,
-        notes: notes || null,
-      });
+      await onSubmit({ company, role, status, deadline: deadline || null, notes: notes || null });
       setCompany('');
       setRole('');
       setStatus('applied');
@@ -48,57 +43,49 @@ export function ApplicationForm({
     }
   };
 
-  const field = 'rounded-lg border border-gray-300 px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500';
+  const label = 'font-mono text-xs uppercase tracking-widest text-zinc-500';
 
   return (
-    <form onSubmit={handleSubmit} className="bg-white rounded-xl shadow p-4 space-y-3">
-      <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
-        <input
-          required
-          placeholder="Company"
-          value={company}
-          onChange={(e) => setCompany(e.target.value)}
-          className={field}
-        />
-        <input
-          required
-          placeholder="Role"
-          value={role}
-          onChange={(e) => setRole(e.target.value)}
-          className={field}
-        />
-        <select
-          value={status}
-          onChange={(e) => setStatus(e.target.value as ApplicationStatus)}
-          className={field}
-        >
-          {STATUSES.map((s) => (
-            <option key={s} value={s}>
-              {s}
-            </option>
-          ))}
-        </select>
-        <input
-          type="date"
-          value={deadline}
-          onChange={(e) => setDeadline(e.target.value)}
-          className={field}
-        />
+    <form onSubmit={handleSubmit} className={`${PANEL} space-y-4 p-6`}>
+      <p className="font-mono text-xs text-zinc-600">
+        <span className="text-accent">{'>'}</span> new application
+      </p>
+      <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
+        <div className="flex flex-col gap-2">
+          <label className={label} htmlFor="company">company</label>
+          <input id="company" required placeholder="Stripe" value={company}
+            onChange={(e) => setCompany(e.target.value)} className={INPUT} />
+        </div>
+        <div className="flex flex-col gap-2">
+          <label className={label} htmlFor="role">role</label>
+          <input id="role" required placeholder="Backend Engineering Intern" value={role}
+            onChange={(e) => setRole(e.target.value)} className={INPUT} />
+        </div>
+        <div className="flex flex-col gap-2">
+          <label className={label} htmlFor="status">status</label>
+          <select id="status" value={status}
+            onChange={(e) => setStatus(e.target.value as ApplicationStatus)} className={INPUT}>
+            {STATUSES.map((s) => (
+              <option key={s} value={s} className="bg-panel">{s}</option>
+            ))}
+          </select>
+        </div>
+        <div className="flex flex-col gap-2">
+          <label className={label} htmlFor="deadline">deadline</label>
+          <input id="deadline" type="date" value={deadline}
+            onChange={(e) => setDeadline(e.target.value)} className={`${INPUT} [color-scheme:dark]`} />
+        </div>
       </div>
-      <textarea
-        placeholder="Notes (optional)"
-        value={notes}
-        onChange={(e) => setNotes(e.target.value)}
-        className={`${field} w-full`}
-        rows={2}
-      />
-      {error && <p className="text-sm text-red-600">{error}</p>}
-      <button
-        type="submit"
-        disabled={busy}
-        className="rounded-lg bg-indigo-600 px-4 py-2 text-sm font-medium text-white hover:bg-indigo-700 disabled:opacity-50"
-      >
-        {busy ? 'Adding…' : 'Add application'}
+      <div className="flex flex-col gap-2">
+        <label className={label} htmlFor="notes">notes</label>
+        <textarea id="notes" rows={2} placeholder="Referral from a friend, follow up next week..."
+          value={notes} onChange={(e) => setNotes(e.target.value)} className={INPUT} />
+      </div>
+
+      {error && <p className="font-mono text-xs text-red-400">{error}</p>}
+
+      <button type="submit" disabled={busy} className={BTN_PRIMARY}>
+        {busy ? 'adding...' : '[ add application ]'}
       </button>
     </form>
   );

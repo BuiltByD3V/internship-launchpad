@@ -2,6 +2,7 @@ import { useState } from 'react';
 import type { FormEvent } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useAuth } from '../hooks/useAuth';
+import { INPUT, BTN_PRIMARY } from '../components/ui';
 
 export function Login() {
   const { signIn, signUp } = useAuth();
@@ -18,11 +19,8 @@ export function Login() {
     setError(null);
     setBusy(true);
     try {
-      if (mode === 'signin') {
-        await signIn(email, password);
-      } else {
-        await signUp(email, password);
-      }
+      if (mode === 'signin') await signIn(email, password);
+      else await signUp(email, password);
       navigate('/');
     } catch (err) {
       setError(err instanceof Error ? err.message : 'Something went wrong');
@@ -31,55 +29,121 @@ export function Login() {
     }
   };
 
+  const label = 'font-mono text-xs uppercase tracking-widest text-zinc-500';
+
   return (
-    <div className="min-h-screen flex items-center justify-center bg-gray-50 px-4">
-      <div className="w-full max-w-sm bg-white rounded-xl shadow p-8">
-        <h1 className="text-2xl font-bold text-gray-900 mb-1">Internship Launchpad</h1>
-        <p className="text-sm text-gray-500 mb-6">
-          {mode === 'signin' ? 'Sign in to your account' : 'Create an account'}
-        </p>
+    <div className="relative grid min-h-[100dvh] bg-surface lg:grid-cols-2">
+      <div className="grid-wash pointer-events-none absolute inset-0" />
 
-        <form onSubmit={handleSubmit} className="space-y-4">
-          <input
-            type="email"
-            required
-            placeholder="you@example.com"
-            value={email}
-            onChange={(e) => setEmail(e.target.value)}
-            className="w-full rounded-lg border border-gray-300 px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500"
+      {/* Brand half - faux terminal session. */}
+      <div className="relative hidden overflow-hidden border-r border-edge lg:flex lg:flex-col lg:justify-between lg:p-12">
+        <div
+          className="pointer-events-none absolute inset-0 opacity-70"
+          style={{
+            background:
+              'radial-gradient(60% 50% at 20% 15%, rgba(163,230,53,0.10), transparent 70%)',
+          }}
+        />
+        <div className="relative flex items-center gap-2 font-mono text-sm text-zinc-400">
+          <span
+            className="h-2 w-2 rounded-full bg-accent"
+            style={{ animation: 'pulse-ring 2.4s infinite' }}
           />
-          <input
-            type="password"
-            required
-            minLength={6}
-            placeholder="Password"
-            value={password}
-            onChange={(e) => setPassword(e.target.value)}
-            className="w-full rounded-lg border border-gray-300 px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500"
-          />
+          internship-launchpad
+        </div>
 
-          {error && <p className="text-sm text-red-600">{error}</p>}
+        <div className="relative">
+          <pre className="font-mono text-sm leading-7 text-zinc-500">
+            <span className="text-zinc-600">$</span>{' '}
+            <span className="text-zinc-300">launchpad</span> --init{'\n'}
+            <span className="text-accent">{'>'}</span> track every application{'\n'}
+            <span className="text-accent">{'>'}</span> turn a job description into{'\n'}
+            {'  '}skill-gaps + a mock interview set{'\n'}
+            <span className="text-accent">{'>'}</span> prep against{' '}
+            <span className="text-zinc-300">your</span> profile, not a guess
+          </pre>
+          <h1 className="mt-8 max-w-[18ch] text-4xl font-bold leading-[1.05] tracking-tighter text-white">
+            Run your internship hunt like a build.
+          </h1>
+        </div>
+
+        <div className="relative font-mono text-xs text-zinc-600">v1 - built solo</div>
+      </div>
+
+      {/* Form half */}
+      <div className="relative flex items-center justify-center px-6 py-16">
+        <div className="w-full max-w-sm">
+          <div className="font-mono text-xl tracking-tight text-zinc-100">
+            <span className="text-accent">~</span>
+            <span className="text-zinc-600">/</span>
+            {mode === 'signin' ? 'login' : 'register'}
+          </div>
+          <p className="mt-1 mb-8 font-mono text-xs text-zinc-600">
+            {mode === 'signin'
+              ? '// authenticate to continue'
+              : '// create an account in under a minute'}
+          </p>
+
+          <form onSubmit={handleSubmit} className="space-y-4">
+            <div className="flex flex-col gap-2">
+              <label htmlFor="email" className={label}>
+                email
+              </label>
+              <input
+                id="email"
+                type="email"
+                required
+                placeholder="you@university.edu"
+                value={email}
+                onChange={(e) => setEmail(e.target.value)}
+                className={INPUT}
+              />
+            </div>
+            <div className="flex flex-col gap-2">
+              <label htmlFor="password" className={label}>
+                password
+              </label>
+              <input
+                id="password"
+                type="password"
+                required
+                minLength={6}
+                placeholder="at least 6 characters"
+                value={password}
+                onChange={(e) => setPassword(e.target.value)}
+                className={INPUT}
+              />
+            </div>
+
+            {error && (
+              <p className="rounded-md border border-red-500/20 bg-red-500/10 px-3 py-2 font-mono text-xs text-red-400">
+                {error}
+              </p>
+            )}
+
+            <button type="submit" disabled={busy} className={`${BTN_PRIMARY} w-full`}>
+              {busy ? 'working...' : mode === 'signin' ? '[ sign in ]' : '[ sign up ]'}
+            </button>
+          </form>
 
           <button
-            type="submit"
-            disabled={busy}
-            className="w-full rounded-lg bg-indigo-600 px-3 py-2 text-sm font-medium text-white hover:bg-indigo-700 disabled:opacity-50"
+            onClick={() => {
+              setMode(mode === 'signin' ? 'signup' : 'signin');
+              setError(null);
+            }}
+            className="mt-6 font-mono text-xs text-zinc-500 transition-colors hover:text-zinc-300"
           >
-            {busy ? 'Please wait…' : mode === 'signin' ? 'Sign in' : 'Sign up'}
+            {mode === 'signin' ? (
+              <>
+                no account? <span className="text-accent">register</span>
+              </>
+            ) : (
+              <>
+                have an account? <span className="text-accent">login</span>
+              </>
+            )}
           </button>
-        </form>
-
-        <button
-          onClick={() => {
-            setMode(mode === 'signin' ? 'signup' : 'signin');
-            setError(null);
-          }}
-          className="mt-4 w-full text-center text-sm text-indigo-600 hover:underline"
-        >
-          {mode === 'signin'
-            ? "Don't have an account? Sign up"
-            : 'Already have an account? Sign in'}
-        </button>
+        </div>
       </div>
     </div>
   );

@@ -4,6 +4,7 @@ import { env } from './config/env.js';
 import { isAllowedOrigin } from './utils/corsConfig.js';
 import applicationsRouter from './routes/applications.js';
 import aiRouter from './routes/ai.js';
+import profileRouter from './routes/profile.js';
 
 const app = express();
 
@@ -26,6 +27,9 @@ app.get('/health', (_req, res) => {
 
 // Applications CRUD (all routes require auth; queries run under the user's JWT).
 app.use('/api/applications', applicationsRouter);
+
+// Student profile used to personalize AI guidance.
+app.use('/api/profile', profileRouter);
 
 // AI features (skill-gap analysis + mock interview questions).
 app.use('/api/ai', aiRouter);

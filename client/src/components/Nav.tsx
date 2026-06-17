@@ -2,37 +2,59 @@ import { NavLink } from 'react-router-dom';
 import { useAuth } from '../hooks/useAuth';
 
 const linkClass = ({ isActive }: { isActive: boolean }) =>
-  `px-3 py-2 text-sm font-medium rounded-lg ${
-    isActive ? 'bg-indigo-100 text-indigo-700' : 'text-gray-600 hover:bg-gray-100'
+  `px-2.5 py-1 font-mono text-sm rounded transition-colors ${
+    isActive ? 'text-accent bg-accent/10' : 'text-zinc-500 hover:text-zinc-200'
   }`;
+
+const LINKS: { to: string; label: string; end?: boolean }[] = [
+  { to: '/', label: 'dashboard', end: true },
+  { to: '/applications', label: 'applications' },
+  { to: '/analyze', label: 'analyze' },
+  { to: '/profile', label: 'profile' },
+];
 
 export function Nav() {
   const { user, signOut } = useAuth();
 
   return (
-    <nav className="bg-white border-b border-gray-200">
-      <div className="max-w-5xl mx-auto px-4 h-14 flex items-center justify-between">
-        <div className="flex items-center gap-1">
-          <span className="font-bold text-gray-900 mr-3">🚀 Launchpad</span>
-          <NavLink to="/" end className={linkClass}>
-            Dashboard
-          </NavLink>
-          <NavLink to="/applications" className={linkClass}>
-            Applications
-          </NavLink>
-          <NavLink to="/analyze" className={linkClass}>
-            Job Analysis
-          </NavLink>
-        </div>
+    <nav className="sticky top-0 z-40 border-b border-edge bg-surface/80 backdrop-blur-xl">
+      <div className="mx-auto flex h-14 max-w-5xl items-center justify-between px-4">
         <div className="flex items-center gap-3">
-          <span className="text-sm text-gray-500 hidden sm:inline">{user?.email}</span>
+          <span className="flex items-center gap-2 font-mono text-sm text-zinc-300">
+            <span
+              className="h-2 w-2 rounded-full bg-accent"
+              style={{ animation: 'pulse-ring 2.4s infinite' }}
+            />
+            launchpad
+          </span>
+          <span className="hidden text-zinc-700 sm:inline">-</span>
+          <div className="hidden items-center gap-0.5 sm:flex">
+            {LINKS.map(({ to, label, end }) => (
+              <NavLink key={to} to={to} end={end} className={linkClass}>
+                {label}
+              </NavLink>
+            ))}
+          </div>
+        </div>
+        <div className="flex items-center gap-4">
+          <span className="hidden font-mono text-xs text-zinc-600 md:inline">
+            {user?.email}
+          </span>
           <button
             onClick={() => void signOut()}
-            className="text-sm text-gray-600 hover:text-gray-900"
+            className="font-mono text-xs text-zinc-500 transition-colors hover:text-accent"
           >
-            Sign out
+            exit
           </button>
         </div>
+      </div>
+      {/* Mobile link row */}
+      <div className="flex items-center gap-0.5 overflow-x-auto border-t border-edge px-4 py-2 sm:hidden">
+        {LINKS.map(({ to, label, end }) => (
+          <NavLink key={to} to={to} end={end} className={linkClass}>
+            {label}
+          </NavLink>
+        ))}
       </div>
     </nav>
   );

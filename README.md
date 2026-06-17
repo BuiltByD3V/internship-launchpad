@@ -26,12 +26,19 @@ Internship Launchpad is a full-stack internship tracking and career preparation 
 - Show upcoming deadlines
 - Render loading and empty states
 
+### Student profile and onboarding
+
+- Capture target role, experience level, skills, education, interests, and industry preferences
+- Require the core onboarding fields before using the dashboard, applications, or analysis tools
+- Store profile data in Supabase Postgres with RLS policies
+- Let users revisit and update their profile from the navigation
+
 ### AI job analysis
 
 - Paste a job description into the analysis page
 - Call the Express API, which keeps the Anthropic key on the server
-- Generate skill gaps with importance levels and learning suggestions
-- Generate technical, behavioral, and role-specific mock interview questions
+- Generate profile-aware skill gaps with importance levels and learning suggestions
+- Generate technical, behavioral, and role-specific mock interview questions tuned to the user's experience level
 - Limit output size to reduce Claude token usage
 
 ### AI cost controls
@@ -40,10 +47,16 @@ Internship Launchpad is a full-stack internship tracking and career preparation 
 - Optional demo allowlist with `AI_ALLOWED_EMAILS`
 - Per-user cooldown, hourly limit, and daily limit before paid Claude calls
 - Job-description character cap before paid Claude calls
-- Per-user cache for repeated job descriptions
+- Per-user cache for repeated profile/job-description combinations
 - Usage logging with estimated and actual token counts
 - Client-side character counter and quota-aware error messages
-- Focused server tests for validation, cache keys, cooldowns, and quota math
+- Focused server tests for validation, cache keys, cooldowns, quota math, and profile personalization
+
+### Frontend design
+
+- Terminal-inspired authenticated app shell
+- Profile-gated user flow
+- Responsive dashboard, application list, profile form, and analysis views
 
 ## What is not implemented yet
 
@@ -51,8 +64,6 @@ Internship Launchpad is a full-stack internship tracking and career preparation 
 - Pagination or filtering for large application lists
 - Interview conversion-rate analytics
 - Skill development goal tracking
-- Profile/onboarding API and UI
-- Personalized profile-aware AI analysis
 - Full study roadmaps or broader career insight reports
 - Resume upload, resume parsing, or profile prefill from a resume
 
@@ -89,11 +100,11 @@ Internship Launchpad is a full-stack internship tracking and career preparation 
 client/
   vercel.json      Vercel SPA rewrite config
   src/
-    components/     navigation, route guards, and application UI
+    components/     navigation, route guards, profile inputs, and application UI
     context/        auth session state
-    hooks/          application data hooks
+    hooks/          application and profile data hooks
     lib/            API and Supabase clients
-    pages/          login, dashboard, applications, analysis
+    pages/          login, dashboard, applications, profile, analysis
     types/          shared client-side TypeScript types
 
 server/
@@ -105,7 +116,7 @@ server/
     routes/         Express route modules
     services/       Supabase-backed AI usage and cache helpers
     types/          server-side TypeScript types
-    utils/          testable AI cost-control logic
+    utils/          testable AI cost-control, profile, and CORS logic
   tests/            focused server tests
 ```
 
@@ -163,10 +174,11 @@ Run these files in the Supabase SQL editor:
 
 ```text
 server/db/schema.sql
+server/db/profiles.sql
 server/db/ai_usage.sql
 ```
 
-`schema.sql` creates the `applications` table and RLS policies. `ai_usage.sql` creates the AI usage log, AI analysis cache, and related RLS policies.
+`schema.sql` creates the `applications` table and RLS policies. `profiles.sql` creates the student profile table and RLS policies. `ai_usage.sql` creates the AI usage log, AI analysis cache, and related RLS policies.
 
 ### 4. Start the development servers
 
@@ -214,6 +226,8 @@ These routes require `Authorization: Bearer <supabase_access_token>`:
 - `GET /api/applications/:id`
 - `PATCH /api/applications/:id`
 - `DELETE /api/applications/:id`
+- `GET /api/profile`
+- `PUT /api/profile`
 - `POST /api/ai/analyze`
 
 ## Deployment
@@ -232,6 +246,7 @@ Run these SQL files in the Supabase SQL editor before deploying:
 
 ```text
 server/db/schema.sql
+server/db/profiles.sql
 server/db/ai_usage.sql
 ```
 
@@ -298,7 +313,7 @@ After both services deploy:
 1. Copy the backend Vercel URL into the frontend project as `VITE_API_URL`.
 2. Copy the frontend Vercel URL into the backend project as `CLIENT_ORIGINS`.
 3. Redeploy both services so the new environment variables take effect.
-4. Sign in, add an application, and run one AI analysis from the deployed frontend.
+4. Sign in, complete the profile form, add an application, and run one AI analysis from the deployed frontend.
 
 ## Author
 
