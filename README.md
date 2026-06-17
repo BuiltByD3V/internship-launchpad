@@ -1,5 +1,7 @@
 # Internship Launchpad
 
+**Live demo:** https://internship-launchpad-p1i8.vercel.app
+
 Internship Launchpad is a full-stack internship tracking and career preparation app for students. It lets you manage applications, protect each user's data with Supabase Auth and Row Level Security (RLS), and use Claude to turn a job description into skill gaps and mock interview questions.
 
 ## What is implemented
