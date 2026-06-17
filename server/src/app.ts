@@ -1,24 +1,12 @@
 import express from 'express';
-import cors from 'cors';
-import { env } from './config/env.js';
-import { isAllowedOrigin } from './utils/corsConfig.js';
+import { allowConfiguredCors } from './middleware/cors.js';
 import applicationsRouter from './routes/applications.js';
 import aiRouter from './routes/ai.js';
 import profileRouter from './routes/profile.js';
 
 const app = express();
 
-app.use(
-  cors({
-    origin(origin, callback) {
-      if (isAllowedOrigin(origin, env.clientOrigins)) {
-        callback(null, true);
-        return;
-      }
-      callback(new Error('Origin not allowed by CORS'));
-    },
-  }),
-);
+app.use(allowConfiguredCors);
 app.use(express.json());
 
 app.get('/health', (_req, res) => {

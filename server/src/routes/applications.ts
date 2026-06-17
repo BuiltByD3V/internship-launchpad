@@ -1,4 +1,5 @@
 import { Router } from 'express';
+import { allowConfiguredCors } from '../middleware/cors.js';
 import { requireAuth } from '../middleware/auth.js';
 import {
   listApplications,
@@ -11,6 +12,7 @@ import {
 const router = Router();
 
 // Every route in this router requires a valid session.
+router.use(allowConfiguredCors);
 router.use(requireAuth);
 
 router.get('/', listApplications);
