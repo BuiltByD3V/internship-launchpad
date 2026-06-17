@@ -32,18 +32,23 @@ export async function getRecentUsageEvents(
 ): Promise<UsageQueryResult> {
   const { data, error } = await db
     .from('ai_usage_events')
-    .select('created_at, cache_hit')
+    .select('created_at, cache_hit, success')
     .eq('user_id', userId)
     .gte('created_at', since.toISOString())
     .order('created_at', { ascending: false });
 
   if (error) return { events: [], error: error.message };
 
-  const rows = (data ?? []) as Array<{ created_at: string; cache_hit: boolean }>;
+  const rows = (data ?? []) as Array<{
+    created_at: string;
+    cache_hit: boolean;
+    success: boolean;
+  }>;
   return {
     events: rows.map((row) => ({
       createdAt: new Date(row.created_at),
       cacheHit: row.cache_hit,
+      success: row.success,
     })),
     error: null,
   };

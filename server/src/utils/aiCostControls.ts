@@ -10,6 +10,7 @@ export interface AiLimitConfig {
 export interface UsageWindowEvent {
   createdAt: Date;
   cacheHit: boolean;
+  success: boolean;
 }
 
 export type ValidationResult =
@@ -74,7 +75,7 @@ export function evaluateUsageLimit({
   config: AiLimitConfig;
 }): UsageLimitResult {
   const paidEvents = events
-    .filter((event) => !event.cacheHit)
+    .filter((event) => event.success && !event.cacheHit)
     .sort((a, b) => b.createdAt.getTime() - a.createdAt.getTime());
 
   const latest = paidEvents[0];

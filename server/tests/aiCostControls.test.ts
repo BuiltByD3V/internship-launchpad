@@ -22,6 +22,7 @@ function event(secondsAgo: number, cacheHit = false): UsageWindowEvent {
   return {
     createdAt: new Date(now.getTime() - secondsAgo * 1000),
     cacheHit,
+    success: true,
   };
 }
 
@@ -84,6 +85,22 @@ describe('AI cost controls', () => {
       event(600),
       event(1_200, true),
       event(90_000, true),
+    ];
+
+    const result = evaluateUsageLimit({
+      events,
+      now,
+      config: { ...baseConfig, hourlyUserLimit: 2, dailyUserLimit: 2 },
+    });
+
+    assert.equal(result.allowed, true);
+  });
+
+  test('does not count failed AI calls against cooldown or quota', () => {
+    const events: UsageWindowEvent[] = [
+      { createdAt: new Date(now.getTime() - 10 * 1000), cacheHit: false, success: false },
+      { createdAt: new Date(now.getTime() - 600 * 1000), cacheHit: false, success: false },
+      { createdAt: new Date(now.getTime() - 1_200 * 1000), cacheHit: false, success: false },
     ];
 
     const result = evaluateUsageLimit({
