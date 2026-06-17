@@ -1,4 +1,9 @@
 import type { Request, Response } from 'express';
+import type {
+  ContentBlock,
+  Message as AnthropicMessage,
+  TextBlock,
+} from '@anthropic-ai/sdk/resources/messages';
 import { anthropic, AI_MODEL } from '../config/anthropic.js';
 import { env } from '../config/env.js';
 import { createUserClient } from '../config/supabase.js';
@@ -15,8 +20,6 @@ import {
   recordUsageEvent,
   saveCachedAnalysis,
 } from '../services/aiUsage.js';
-
-type AnthropicMessage = Awaited<ReturnType<typeof anthropic.messages.create>>;
 
 const ANALYSIS_SCHEMA = {
   type: 'object',
@@ -55,6 +58,10 @@ const ANALYSIS_SCHEMA = {
   required: ['skillGaps', 'interviewQuestions'],
   additionalProperties: false,
 } as const;
+
+function isTextBlock(block: ContentBlock): block is TextBlock {
+  return block.type === 'text';
+}
 
 export async function analyzeJob(req: Request, res: Response): Promise<void> {
   const { jobDescription } = req.body ?? {};
@@ -184,8 +191,8 @@ export async function analyzeJob(req: Request, res: Response): Promise<void> {
     return;
   }
 
-  const textBlock = response.content.find((block) => block.type === 'text');
-  if (!textBlock || textBlock.type !== 'text') {
+  const textBlock = response.content.find(isTextBlock);
+  if (!textBlock) {
     await recordUsageEvent(db, {
       userId,
       endpoint,
