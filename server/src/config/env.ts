@@ -20,4 +20,5 @@ export const env = {
   clientOrigin: process.env.CLIENT_ORIGIN ?? 'http://localhost:5173',
   supabaseUrl: required('SUPABASE_URL'),
   supabasePublishableKey: required('SUPABASE_PUBLISHABLE_KEY'),
+  anthropicApiKey: required('ANTHROPIC_API_KEY'),
 } as const;

@@ -4,6 +4,7 @@ import { env } from './config/env.js';
 import { supabasePublic } from './config/supabase.js';
 import { requireAuth } from './middleware/auth.js';
 import applicationsRouter from './routes/applications.js';
+import aiRouter from './routes/ai.js';
 
 const app = express();
 
@@ -22,6 +23,9 @@ app.get('/api/me', requireAuth, (req, res) => {
 
 // Applications CRUD (all routes require auth; queries run under the user's JWT).
 app.use('/api/applications', applicationsRouter);
+
+// AI features (skill-gap analysis + mock interview questions).
+app.use('/api/ai', aiRouter);
 
 // TEMP (Step 2/3 verification) — proves the anon key + DB connection work.
 // Succeeds once the applications table + RLS exist (Step 3). Remove later.
