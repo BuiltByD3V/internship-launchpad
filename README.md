@@ -4,6 +4,20 @@
 
 Internship Launchpad is a full-stack internship tracking and career preparation app for students. It lets you manage applications, protect each user's data with Supabase Auth and Row Level Security (RLS), and use Claude to turn a job description into skill gaps and mock interview questions.
 
+## Screenshots
+
+| Login | Dashboard |
+|---|---|
+| ![Login](docs/screenshots/login.png) | ![Dashboard](docs/screenshots/dashboard.png) |
+
+| Applications | AI Analysis |
+|---|---|
+| ![Applications](docs/screenshots/applications.png) | ![Analyze](docs/screenshots/analyze.png) |
+
+| Profile intake |
+|---|
+| ![Profile](docs/screenshots/profile.png) |
+
 ## What is implemented
 
 ### Authentication and authorization
