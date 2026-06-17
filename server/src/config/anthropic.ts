@@ -1,4 +1,4 @@
-import Anthropic from '@anthropic-ai/sdk';
+import { Anthropic } from '@anthropic-ai/sdk';
 import { env } from './env.js';
 
 // Anthropic client for the AI features (Step 7).
