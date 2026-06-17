@@ -23,6 +23,7 @@ import {
   buildProfilePromptContext,
   hashPersonalizedAnalysisRequest,
 } from '../utils/profilePersonalization.js';
+import { describeAnthropicApiKey } from '../utils/secretDiagnostics.js';
 import type { Profile } from '../types/index.js';
 
 const ANALYSIS_SCHEMA = {
@@ -65,6 +66,20 @@ const ANALYSIS_SCHEMA = {
 
 function isTextBlock(block: ContentBlock): block is TextBlock {
   return block.type === 'text';
+}
+
+function getProviderStatus(error: unknown): number | null {
+  if (!error || typeof error !== 'object') return null;
+
+  const status = (error as { status?: unknown }).status;
+  return typeof status === 'number' ? status : null;
+}
+
+function getProviderRequestId(error: unknown): string | null {
+  if (!error || typeof error !== 'object') return null;
+
+  const requestID = (error as { requestID?: unknown }).requestID;
+  return typeof requestID === 'string' ? requestID : null;
 }
 
 async function getProfileForAnalysis(
@@ -211,6 +226,13 @@ export async function analyzeJob(req: Request, res: Response): Promise<void> {
       },
     });
   } catch (error) {
+    const providerStatus = getProviderStatus(error);
+    const providerRequestId = getProviderRequestId(error);
+    const providerAuthFailed = providerStatus === 401;
+    const errorCode = providerAuthFailed
+      ? 'anthropic_auth_error'
+      : 'anthropic_error';
+
     await recordUsageEvent(db, {
       userId,
       endpoint,
@@ -221,11 +243,22 @@ export async function analyzeJob(req: Request, res: Response): Promise<void> {
       outputTokens: null,
       cacheHit: false,
       success: false,
-      errorCode: 'anthropic_error',
+      errorCode,
     });
 
-    console.error(error);
-    res.status(502).json({ error: 'AI analysis failed. Try again later.' });
+    console.error('AI provider request failed', {
+      errorCode,
+      providerStatus,
+      providerRequestId,
+      anthropicApiKey: describeAnthropicApiKey(env.anthropicApiKey),
+      message: error instanceof Error ? error.message : String(error),
+    });
+
+    res.status(502).json({
+      error: providerAuthFailed
+        ? 'AI provider authentication failed. Check the server ANTHROPIC_API_KEY environment variable.'
+        : 'AI analysis failed. Try again later.',
+    });
     return;
   }
 
